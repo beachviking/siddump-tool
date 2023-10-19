@@ -4,7 +4,7 @@
 #include <math.h>
 #include <ctype.h>
 #include "cpu.h"
-#include "SidDecoder.h"
+#include "SidOutput.h"
 #include "SidState.h"
 
 #define MAX_INSTR 0x100000
@@ -24,6 +24,11 @@ typedef struct
   unsigned char ctrl;
   unsigned char type;
 } FILTER;
+
+typedef struct {
+  
+} DumpOptions;
+
 
 int main(int argc, char **argv);
 unsigned char readbyte(FILE *f);
