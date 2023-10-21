@@ -34,3 +34,6 @@
 # Misc
 *.sid
 *.dmp
+*.json
+
+/siddump.dSYM

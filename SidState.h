@@ -28,7 +28,7 @@ struct SidState
   void update(unsigned char *mem);
   void dumpCurrentState();
 
-  const int sid_baseaddr = 0xd400;
+  int sid_baseaddr = 0xd400;
 };
 
 void SidState::reset()
