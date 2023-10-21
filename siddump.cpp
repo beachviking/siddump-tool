@@ -4,8 +4,8 @@
 #include <math.h>
 #include <ctype.h>
 #include "cpu.h"
-#include "SidOutput.h"
-#include "SidState.h"
+// #include "SidOutput.h"
+// #include "SidState.h"
 
 #define MAX_INSTR 0x100000
 
@@ -42,8 +42,8 @@ FILTER prevfilt;
 
 extern unsigned short pc;
 
-SidOutput *output;
-SidState sid;
+// SidOutput *output;
+// SidState sid;
 
 const char *notename[] =
  {"C-0", "C#0", "D-0", "D#0", "E-0", "F-0", "F#0", "G-0", "G#0", "A-0", "A#0", "B-0",
@@ -333,9 +333,6 @@ int main(int argc, char **argv)
     }
 
     // Get SID parameters from each channel and the filter
-    // updateSIDState();
-    sid.update(mem);
-
     for (c = 0; c < 3; c++)
     {
       chn[c].freq = mem[0xd400 + 7*c] | (mem[0xd401 + 7*c] << 8);

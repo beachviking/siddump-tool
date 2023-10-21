@@ -34,3 +34,5 @@
 # Misc
 *.sid
 *.dmp
+*.txt
+siddump.dSYM
