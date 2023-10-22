@@ -57,7 +57,6 @@ class BinaryFileOutputRegisterDumps : public SidOutput {
     };
 
     virtual void processCurrentFrame(SidState current, int frames) {
-      
       for(int i=0; i < 25; i++)
         fputc(current.sidreg[i], outbinary);  
     };
@@ -87,7 +86,6 @@ class IncludeFileOutputRegisterDumps : public SidOutput {
           return;
       }
       fprintf(txtfile, "unsigned char %s[] = {\n", "sound_data");
-      
     };
     
     virtual void processCurrentFrame(SidState current, int frames) {
@@ -149,7 +147,7 @@ class ScreenOutputRegistersOnly : public SidOutput {
 
           prev_state.sidreg[c] = current.sidreg[c];
         } 
-        
+
         sprintf(&output[strlen(output)], "|\n");
         printf("%s", output);
       }
