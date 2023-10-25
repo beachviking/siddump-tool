@@ -23,13 +23,15 @@ struct SidState
 {
   Voice voice[3];
   Filter filt;
-  unsigned int sidreg[25];
+  unsigned int sidreg[27];  // 0-24 sid regs, 25 = dt HI, 26 = dt LO
+  // unsigned int sidreg[25];
   
   void reset();
   void update(unsigned char *mem);
   void dumpCurrentState();
 
   int sid_baseaddr = 0xd400;
+  // u_int32_t cia_val = 0x0000;
 };
 
 void SidState::reset()
@@ -56,6 +58,17 @@ void SidState::update(unsigned char *mem)
     // update registers
     for(int i = 0; i < 25; i++)
       sidreg[i] = mem[sid_baseaddr + i];
+
+    // cia_val = (mem[0xdc04] << 8) | (mem[0xdc05]);
+    if (mem[0xdc05] == 0 && mem[0xdc04] == 0) {
+      // Most likely vbi driven, ie. 20000us
+      sidreg[25] = 0x4e; // dt HI
+      sidreg[26] = 0x20; // dt LO
+    } else {
+      // CIA timer is used to control updates...
+      sidreg[25] = mem[0xdc05]; // dt HI
+      sidreg[26] = mem[0xdc04]; // dt LO
+    }
 }
 
 void SidState::dumpCurrentState()

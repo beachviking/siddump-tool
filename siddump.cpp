@@ -34,6 +34,7 @@ int main(int argc, char **argv)
   BinaryFileOutputRegisterDumps file_binary;
   IncludeFileOutputRegisterDumps file_h;
   ScreenOutputRegistersOnly screen_regs;
+  BinaryFileOutputRegisterAndDtDumps file_binary_dt;
 
   unsigned loadend;
   unsigned loadpos;
@@ -130,6 +131,7 @@ int main(int argc, char **argv)
            "          1 = output to screen, sid registers only\n"
            "          2 = output to binary file, all sid registers per frame\n"
            "          3 = output to c friendly include file, all sid registers per frame\n"
+           "          4 = output to binary file, all sid registers + dt HI/LO bytes per frame\n"
            "-n<value> Note spacing, default 0 (none)\n"
            "-o<value> ""Oldnote-sticky"" factor. Default 1, increase for better vibrato display\n"
            "          (when increased, requires well calibrated frequencies)\n"
@@ -156,6 +158,12 @@ int main(int argc, char **argv)
     case 3:
     {
       output = &file_h;
+      break;
+    }
+
+    case 4:
+    {
+      output = &file_binary_dt;
       break;
     }
 
