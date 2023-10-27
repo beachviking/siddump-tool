@@ -57,6 +57,37 @@ class BinaryFileOutputRegisterDumps : public SidOutput {
     };
 
     virtual void processCurrentFrame(SidState current, int frames) {
+      for(int i=0; i < 25; i++)
+        fputc(current.sidreg[i], outbinary);  
+    };
+
+    virtual void postProcessing() {
+      fclose(outbinary);  
+    };
+
+  private:
+    FILE *outbinary = NULL;
+};
+
+class BinaryFileOutputRegisterAndDtDumps : public SidOutput {
+  public:
+
+    // pure virtual functions
+    virtual void preProcessing() 
+    {
+      char filename[64] = {0};
+      strcpy(filename, opts->songfilename);
+      strcat(filename, ".dmp");
+      outbinary = fopen(filename, "wb");
+      if (!outbinary)
+      {
+          printf("Error: couldn't write binary file");
+          fclose(outbinary);
+          return;
+      }      
+    };
+
+    virtual void processCurrentFrame(SidState current, int frames) {
       // for(int i=0; i < 25; i++)
       for(int i=0; i < 27; i++)
         fputc(current.sidreg[i], outbinary);  
@@ -115,9 +146,9 @@ class ScreenOutputRegistersOnly : public SidOutput {
       // pure virtual function
       virtual void preProcessing()
       {
-        printf("| Frame | 00 01 02 03 04 05 06 | 07 08 09 10 11 12 13 | 14 15 16 17 18 19 20 | 21 22 23 24 | cia1 |");
+        printf("| Frame | 00 01 02 03 04 05 06 | 07 08 09 10 11 12 13 | 14 15 16 17 18 19 20 | 21 22 23 24 | dt_us |");
         printf("\n");
-        printf("+-------+----------------------+----------------------+----------------------+-------------+------+");
+        printf("+-------+----------------------+----------------------+----------------------+-------------+-------+");
         printf("\n");
       }
 
@@ -150,7 +181,7 @@ class ScreenOutputRegistersOnly : public SidOutput {
         } 
 
         //sprintf(&output[strlen(output)], "| %04X ", current.cia_val);
-        sprintf(&output[strlen(output)], "| %04X ", (current.sidreg[25] << 8) | (current.sidreg[26]));
+        sprintf(&output[strlen(output)], "|  %04X ", (current.sidreg[25] << 8) | (current.sidreg[26]));
         sprintf(&output[strlen(output)], "|\n");
         printf("%s", output);
       }
