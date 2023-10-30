@@ -36,5 +36,5 @@
 *.dmp
 *.json
 *.txt
-/siddump.out.dSYM
+*.dSYM
 
