@@ -19,6 +19,7 @@ extern unsigned short pc;
 SidOutput *output;
 SidState sid;
 SidOutputOptions options;
+SidOutputFactory factory;
 
 int main(int argc, char **argv)
 {
@@ -29,12 +30,6 @@ int main(int argc, char **argv)
   int firstframe = 0;
   int usage = 0;
   int mode = 0;
-
-  ScreenOutputWithNotes screen_notes;
-  BinaryFileOutputRegisterDumps file_binary;
-  IncludeFileOutputRegisterDumps file_h;
-  ScreenOutputRegistersOnly screen_regs;
-  BinaryFileOutputRegisterAndDtDumps file_binary_dt;
 
   unsigned loadend;
   unsigned loadpos;
@@ -141,36 +136,8 @@ int main(int argc, char **argv)
            "-z        Include CPU cycles+rastertime (PAL)+rastertime, badline corrected\n");
     return 1;
   }
-
-  switch(mode) {
-    case 1:
-    {
-      output = &screen_regs;
-      break;
-    }
-
-    case 2:
-    {
-      output = &file_binary;
-      break;
-    }
-
-    case 3:
-    {
-      output = &file_h;
-      break;
-    }
-
-    case 4:
-    {
-      output = &file_binary_dt;
-      break;
-    }
-
-    default:
-      output = &screen_notes;
-      break;
-  }
+  // use the factory to create the requested output object type
+  output = factory.create(mode);
 
   strcpy(options.songfilename, sidname);
   output->setOptions(&options);
@@ -283,6 +250,8 @@ int main(int argc, char **argv)
 
   output->postProcessing();
 
+  // cleanup
+  delete output;
   return 0;
 }
 
