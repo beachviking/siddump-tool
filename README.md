@@ -3,8 +3,15 @@
 by beachviking
 
 Based on the original works of the authors cited below.
-Adds functions to make binary files with raw sid register dumps, in addition 
-to creating C/C++ include files with the same data.
+Adds various output options by introducing an 'm' option:
+
+-m0 = output to screen, with note information
+-m1 = output to screen, sid register contents only
+-m2 = output to binary file, all sid registers per frame
+-m3 = output to a C/C++ friendly include file, all sid registers per frame
+
+A simplistic strategy pattern has been used to make it easy to add new output
+formats without changing the main code.
 
 _________________________________________________________
 ## SIDDump V1.08
