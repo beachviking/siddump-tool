@@ -5,8 +5,8 @@
 #include <ctype.h>
 #include <unistd.h>
 #include "cpu.h"
-// #include "SidOutput.h"
-// #include "SidState.h"
+#include "SidOutput.h"
+#include "SidState.h"
 
 #define MAX_INSTR 0x100000
 

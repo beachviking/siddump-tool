@@ -21,7 +21,8 @@ struct SidOutputOptions
   char songfilename[64] = {0}; 
 };
 
-
+// Base class for the different types of outputs to generate
+// based on a sid file
 class SidOutput {
   public:
 
@@ -36,12 +37,10 @@ class SidOutput {
 
   protected:
     SidOutputOptions *opts;
- 
 };
 
 class BinaryFileOutputRegisterDumps : public SidOutput {
   public:
-
     // pure virtual functions
     virtual void preProcessing() 
     {
@@ -453,6 +452,7 @@ unsigned int ScreenOutputWithNotes::freqtblhi[] = {
   0x45,0x49,0x4e,0x52,0x57,0x5c,0x62,0x68,0x6e,0x75,0x7c,0x83,
   0x8b,0x93,0x9c,0xa5,0xaf,0xb9,0xc4,0xd0,0xdd,0xea,0xf8,0xff};
 
+// Responsible for creating SID output objects on demand...
 class SidOutputFactory {
   public:
     SidOutput* create(int type) {

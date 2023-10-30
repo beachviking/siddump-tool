@@ -37,4 +37,4 @@
 *.json
 *.txt
 /siddump.dSYM
-siddump
+./siddump
