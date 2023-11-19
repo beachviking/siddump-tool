@@ -6,7 +6,7 @@ struct SidOutputOptions
 {
   int seconds = 60;
   int instr = 0;
-  int frames = 0;
+  // int frames = 0;
   int spacing = 0;
   int pattspacing = 0;
   int firstframe = 0;
@@ -30,7 +30,8 @@ class SidOutput {
 
     // pure virtual functions
     virtual void preProcessing() = 0;
-    virtual void processCurrentFrame(SidState current, int frames) = 0;
+    // virtual void processCurrentFrame(SidState current, int frames) = 0;
+    virtual void processCurrentFrame(SidState current) = 0;
     virtual void postProcessing() = 0;
 
     void setOptions(SidOutputOptions *options) {opts = options;}
@@ -56,7 +57,7 @@ class BinaryFileOutputRegisterDumps : public SidOutput {
       }      
     };
 
-    virtual void processCurrentFrame(SidState current, int frames) {
+    virtual void processCurrentFrame(SidState current) {
       for(int i=0; i < 25; i++)
         fputc(current.sidreg[i], outbinary);  
     };
@@ -87,7 +88,7 @@ class BinaryFileOutputRegisterAndDtDumps : public SidOutput {
       }      
     };
 
-    virtual void processCurrentFrame(SidState current, int frames) {
+    virtual void processCurrentFrame(SidState current) {
       // for(int i=0; i < 25; i++)
       for(int i=0; i < 27; i++)
         fputc(current.sidreg[i], outbinary);  
@@ -120,7 +121,7 @@ class IncludeFileOutputRegisterDumps : public SidOutput {
       fprintf(txtfile, "unsigned char %s[] = {\n", "sound_data");
     };
     
-    virtual void processCurrentFrame(SidState current, int frames) {
+    virtual void processCurrentFrame(SidState current) {
       
       for(int i=0; i < 25; i++)
       {
@@ -152,13 +153,13 @@ class ScreenOutputRegistersOnly : public SidOutput {
         printf("\n");
       }
 
-      virtual void processCurrentFrame(SidState current, int frames)
+      virtual void processCurrentFrame(SidState current)
       {
         static int counter = 0;
         static int rows = 0;
 
         char output[512];
-        int time = frames - opts->firstframe;
+        int time = current.time.current_frame - opts->firstframe;
         output[0] = 0;      
 
         if (!opts->timeseconds)
@@ -245,13 +246,13 @@ class ScreenOutputWithNotes : public SidOutput {
         prev_state2.reset();
       }
 
-      virtual void processCurrentFrame(SidState current, int frames)
+      virtual void processCurrentFrame(SidState current)
       {
         static int counter = 0;
         static int rows = 0;
 
         char output[512];
-        int time = frames - opts->firstframe;
+        int time = current.time.current_frame - opts->firstframe;
         output[0] = 0;      
 
         if (!opts->timeseconds)
@@ -272,7 +273,7 @@ class ScreenOutputWithNotes : public SidOutput {
           }
 
           // Frequency
-          if ((frames == opts->firstframe) || (prev_state.voice[c].note == -1) || (current.voice[c].freq != prev_state.voice[c].freq))
+          if ((current.time.current_frame == opts->firstframe) || (prev_state.voice[c].note == -1) || (current.voice[c].freq != prev_state.voice[c].freq))
           {
             int d;
             int dist = 0x7fffffff;
@@ -326,37 +327,37 @@ class ScreenOutputWithNotes : public SidOutput {
           else sprintf(&output[strlen(output)], "....  ... ..  ");
 
           // Waveform
-          if ((frames == opts->firstframe) || (newnote) || (current.voice[c].wave != prev_state.voice[c].wave))
+          if ((current.time.current_frame == opts->firstframe) || (newnote) || (current.voice[c].wave != prev_state.voice[c].wave))
             sprintf(&output[strlen(output)], "%02X ", current.voice[c].wave);
           else sprintf(&output[strlen(output)], ".. ");
 
           // ADSR
-          if ((frames == opts->firstframe) || (newnote) || (current.voice[c].adsr != prev_state.voice[c].adsr)) sprintf(&output[strlen(output)], "%04X ", current.voice[c].adsr);
+          if ((current.time.current_frame == opts->firstframe) || (newnote) || (current.voice[c].adsr != prev_state.voice[c].adsr)) sprintf(&output[strlen(output)], "%04X ", current.voice[c].adsr);
           else sprintf(&output[strlen(output)], ".... ");
 
           // Pulse
-          if ((frames == opts->firstframe) || (newnote) || (current.voice[c].pulse != prev_state.voice[c].pulse)) sprintf(&output[strlen(output)], "%03X ", current.voice[c].pulse);
+          if ((current.time.current_frame == opts->firstframe) || (newnote) || (current.voice[c].pulse != prev_state.voice[c].pulse)) sprintf(&output[strlen(output)], "%03X ", current.voice[c].pulse);
           else sprintf(&output[strlen(output)], "... ");
 
           sprintf(&output[strlen(output)], "| ");
         }
 
         // Filter cutoff
-        if ((frames == opts->firstframe) || (current.filt.cutoff != prev_state.filt.cutoff)) sprintf(&output[strlen(output)], "%04X ", current.filt.cutoff);
+        if ((current.time.current_frame == opts->firstframe) || (current.filt.cutoff != prev_state.filt.cutoff)) sprintf(&output[strlen(output)], "%04X ", current.filt.cutoff);
         else sprintf(&output[strlen(output)], ".... ");
 
         // Filter control
-        if ((frames == opts->firstframe) || (current.filt.ctrl != prev_state.filt.ctrl))
+        if ((current.time.current_frame == opts->firstframe) || (current.filt.ctrl != prev_state.filt.ctrl))
           sprintf(&output[strlen(output)], "%02X ", current.filt.ctrl);
         else sprintf(&output[strlen(output)], ".. ");
 
         // Filter passband
-        if ((frames == opts->firstframe) || ((current.filt.type & 0x70) != (prev_state.filt.type & 0x70)))
+        if ((current.time.current_frame == opts->firstframe) || ((current.filt.type & 0x70) != (prev_state.filt.type & 0x70)))
           sprintf(&output[strlen(output)], "%s ", filtername[(current.filt.type >> 4) & 0x7]);
         else sprintf(&output[strlen(output)], "... ");
 
         // Mastervolume
-        if ((frames == opts->firstframe) || ((current.filt.type & 0xf) != (prev_state.filt.type & 0xf))) sprintf(&output[strlen(output)], "%01X ", current.filt.type & 0xf);
+        if ((current.time.current_frame == opts->firstframe) || ((current.filt.type & 0xf) != (prev_state.filt.type & 0xf))) sprintf(&output[strlen(output)], "%01X ", current.filt.type & 0xf);
         else sprintf(&output[strlen(output)], ". ");
         
         // Rasterlines / cycle count
@@ -371,7 +372,7 @@ class ScreenOutputWithNotes : public SidOutput {
         
         // End of frame display, print info so far and copy SID registers to old registers
         sprintf(&output[strlen(output)], "|\n");
-        if ((!opts->lowres) || (!((frames - opts->firstframe) % opts->spacing)))
+        if ((!opts->lowres) || (!((current.time.current_frame - opts->firstframe) % opts->spacing)))
         {
           printf("%s", output);
           for (int c = 0; c < 3; c++)

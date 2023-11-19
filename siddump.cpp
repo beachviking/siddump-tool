@@ -24,9 +24,9 @@ SidOutputFactory factory;
 int main(int argc, char **argv)
 {
   int subtune = 0;
-  int seconds = 60;
+  // int seconds = 60;
   int instr = 0;
-  int frames = 0;
+  // int frames = 0;
   int firstframe = 0;
   int usage = 0;
   int mode = 0;
@@ -181,6 +181,7 @@ int main(int argc, char **argv)
   fread(&mem[loadaddress], loadsize, 1, in);
   fclose(in);
 
+
   // Print info & run initroutine
   printf("Load address: $%04X Init address: $%04X Play address: $%04X\n", loadaddress, initaddress, playaddress);
   printf("Calling initroutine with subtune %d\n", subtune);
@@ -214,12 +215,16 @@ int main(int argc, char **argv)
     printf("New play address is $%04X\n", playaddress);
   }
 
-  printf("Calling playroutine for %d frames, starting from frame %d\n", options.seconds*50, firstframe);
+  sid.reset();
+  sid.time.end_time = options.seconds * 1000000;  // in us
+  printf("Calling playroutine for %d seconds, starting from frame %d\n", options.seconds, firstframe);
+  // printf("Calling playroutine for %d frames, starting from frame %d\n", options.seconds*50, firstframe);
 
   output->preProcessing();
   
   // Data collection & display loop
-  while (frames < firstframe + options.seconds*50)
+  // while (frames < firstframe + options.seconds*50)
+  while (sid.isPlaying)
   {
     // Run the playroutine
     instr = 0;
@@ -241,11 +246,13 @@ int main(int argc, char **argv)
     sid.update(mem);
 
     // Frame display
-    if (frames >= firstframe)
-      output->processCurrentFrame(sid, frames);
+    // if (frames >= firstframe)
+    if (sid.time.current_frame >= firstframe)
+      output->processCurrentFrame(sid);
 
     // Advance to next frame
-    frames++;
+    sid.tick();
+    // frames++;
   }
 
   output->postProcessing();
