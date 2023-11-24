@@ -24,9 +24,7 @@ SidOutputFactory factory;
 int main(int argc, char **argv)
 {
   int subtune = 0;
-  // int seconds = 60;
   int instr = 0;
-  // int frames = 0;
   int firstframe = 0;
   int usage = 0;
   int mode = 0;
@@ -126,7 +124,9 @@ int main(int argc, char **argv)
            "          1 = output to screen, sid registers only\n"
            "          2 = output to binary file, all sid registers per frame\n"
            "          3 = output to c friendly include file, all sid registers per frame\n"
-           "          4 = output to binary file, all sid registers + dt HI/LO bytes per frame\n"
+           "          4 = output to binary file, all sid registers + timing HI/LO bytes per frame\n"
+           "          5 = output to screen, only output changed sid registers inc. timing HI/LO bytes\n"
+           "          6 = output to binary file, only output changed sid registers inc. timing HI/LO bytes\n"
            "-n<value> Note spacing, default 0 (none)\n"
            "-o<value> ""Oldnote-sticky"" factor. Default 1, increase for better vibrato display\n"
            "          (when increased, requires well calibrated frequencies)\n"
@@ -180,7 +180,6 @@ int main(int argc, char **argv)
   }
   fread(&mem[loadaddress], loadsize, 1, in);
   fclose(in);
-
 
   // Print info & run initroutine
   printf("Load address: $%04X Init address: $%04X Play address: $%04X\n", loadaddress, initaddress, playaddress);

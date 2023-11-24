@@ -102,6 +102,61 @@ class BinaryFileOutputRegisterAndDtDumps : public SidOutput {
     FILE *outbinary = NULL;
 };
 
+class BinaryFileOutputRegisterChangesOnly : public SidOutput {
+  public:
+    BinaryFileOutputRegisterChangesOnly() { prev_state.reset(); }
+    // pure virtual functions
+    virtual void preProcessing() 
+    {
+      char filename[64] = {0};
+      strcpy(filename, opts->songfilename);
+      strcat(filename, ".dmp");
+      outbinary = fopen(filename, "wb");
+      if (!outbinary)
+      {
+          printf("Error: couldn't write binary file");
+          fclose(outbinary);
+          return;
+      }      
+    };
+
+    virtual void processCurrentFrame(SidState current) {
+      // for(int i=0; i < 25; i++)
+      // for(int i=0; i < 27; i++)
+      //   fputc(current.sidreg[i], outbinary);
+      
+      // count number of registers to provide updates for
+      int num_regs_to_update = 0;
+      for (int c = 0; c < 27; c++)
+      {
+        if ((current.sidreg[c] != prev_state.sidreg[c]) || (current.time.current_time == 0))
+          ++num_regs_to_update;
+      }
+      fputc(num_regs_to_update, outbinary);
+
+      // Check registers for changes, print the ones that have changed
+      for (int c = 0; c < 27; c++)
+      {
+        if ((current.sidreg[c] != prev_state.sidreg[c]) || (current.time.current_time == 0)) 
+        {
+          fputc(c, outbinary);
+          fputc(current.sidreg[c], outbinary);
+          // sprintf(&output[strlen(output)], "%02X ", c);
+          // sprintf(&output[strlen(output)], "%02X ", current.sidreg[c]);
+        }
+        prev_state.sidreg[c] = current.sidreg[c];
+      }       
+    };
+
+    virtual void postProcessing() {
+      fclose(outbinary);  
+    };
+
+  private:
+    FILE *outbinary = NULL;
+    SidState prev_state;    
+};
+
 class IncludeFileOutputRegisterDumps : public SidOutput {
   public:
 
@@ -141,6 +196,62 @@ class IncludeFileOutputRegisterDumps : public SidOutput {
     FILE *txtfile = NULL;
 };
 
+class ScreenOutputRegisterChangesOnly : public SidOutput {
+  public:
+      ScreenOutputRegisterChangesOnly() { prev_state.reset(); }
+      // pure virtual function
+      virtual void preProcessing()
+      {
+        printf("| Frame | #X | [(reg,val) X pairs]                                |");
+        printf("\n");
+        printf("+-------+----+----------------------------------------------------+");
+        printf("\n");
+      }
+
+      virtual void processCurrentFrame(SidState current)
+      {
+        static int counter = 0;
+        static int rows = 0;
+
+        char output[512];
+        // int time = current.time.current_frame - opts->firstframe;
+        int time = current.time.current_time;
+        output[0] = 0;      
+
+        sprintf(&output[strlen(output)], "| %5d ", current.time.current_frame);
+        // sprintf(&output[strlen(output)], "|  %04X ", (current.sidreg[25] << 8) | (current.sidreg[26]));
+
+        // count number of registers to provide updates for
+        int num_regs_to_update = 0;
+        for (int c = 0; c < 27; c++)
+        {
+          if ((current.sidreg[c] != prev_state.sidreg[c]) || (current.time.current_time == 0))
+            ++num_regs_to_update;
+        }
+
+        sprintf(&output[strlen(output)], "| %02d | ", num_regs_to_update);
+
+        // Check registers for changes, print the ones that have changed
+        for (int c = 0; c < 27; c++)
+        {
+          if ((current.sidreg[c] != prev_state.sidreg[c]) || (current.time.current_time == 0)) 
+          {
+            sprintf(&output[strlen(output)], "%02X ", c);
+            sprintf(&output[strlen(output)], "%02X ", current.sidreg[c]);
+          }
+          prev_state.sidreg[c] = current.sidreg[c];
+        } 
+
+        sprintf(&output[strlen(output)], "|\n");
+        printf("%s", output);
+      }
+
+    virtual void postProcessing(){}
+
+    private:
+      SidState prev_state;
+};
+
 class ScreenOutputRegistersOnly : public SidOutput {
   public:
       ScreenOutputRegistersOnly() { prev_state.reset(); }
@@ -159,18 +270,20 @@ class ScreenOutputRegistersOnly : public SidOutput {
         static int rows = 0;
 
         char output[512];
-        int time = current.time.current_frame - opts->firstframe;
+        // int time = current.time.current_frame - opts->firstframe;
+        int time = current.time.current_time;
         output[0] = 0;      
 
         if (!opts->timeseconds)
-          sprintf(&output[strlen(output)], "| %5d | ", time);
+          sprintf(&output[strlen(output)], "| %5d | ", current.time.current_frame);
         else
+          // sprintf(&output[strlen(output)], "|%01d:%02d.%02d| ", time/3000, (time/50)%60, time%50);
           sprintf(&output[strlen(output)], "|%01d:%02d.%02d| ", time/3000, (time/50)%60, time%50);
 
         // Loop for all registers
         for (int c = 0; c < 25; c++)
         {
-          if ((current.sidreg[c] != prev_state.sidreg[c]) || (time == 0))
+          if ((current.sidreg[c] != prev_state.sidreg[c]) || (current.time.current_time == 0))
             sprintf(&output[strlen(output)], "%02X ", current.sidreg[c]);
           else
             sprintf(&output[strlen(output)], ".. ");
@@ -466,6 +579,10 @@ class SidOutputFactory {
           return new IncludeFileOutputRegisterDumps();
         case 4:
           return new BinaryFileOutputRegisterAndDtDumps();
+        case 5:
+          return new ScreenOutputRegisterChangesOnly();
+        case 6:
+          return new BinaryFileOutputRegisterChangesOnly();
         default:
           return new ScreenOutputWithNotes();
       }
