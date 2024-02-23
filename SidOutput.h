@@ -280,7 +280,7 @@ class ScreenOutputRegistersOnly : public SidOutput {
           // sprintf(&output[strlen(output)], "|%01d:%02d.%02d| ", time/3000, (time/50)%60, time%50);
           sprintf(&output[strlen(output)], "|%01d:%02d.%02d| ", time/3000, (time/50)%60, time%50);
 
-        // Loop for all registers
+        // Loop through all registers
         for (int c = 0; c < 25; c++)
         {
           if ((current.sidreg[c] != prev_state.sidreg[c]) || (current.time.current_time == 0))
