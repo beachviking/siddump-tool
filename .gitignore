@@ -38,6 +38,4 @@
 *.txt
 /*.dSYM/
 script
-
-
-siddump.out.dSYM/Contents/Info.plist
+.DS_Store
