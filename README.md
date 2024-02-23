@@ -5,13 +5,37 @@ by beachviking
 Based on the original works of the authors cited below.
 Adds various output options by introducing an 'm' option:
 
--m0 = output to screen, with note information
--m1 = output to screen, sid register contents only
--m2 = output to binary file, all sid registers per frame
--m3 = output to a C/C++ friendly include file, all sid registers per frame
-
+```
+0 = output to screen, with note information
+1 = output to screen, sid registers only
+2 = output to binary file, all sid registers per frame
+3 = output to c friendly include file, all sid registers per frame
+4 = output to binary file, all sid registers + timing HI/LO bytes per frame
+5 = output to screen, only output changed sid registers inc. timing HI/LO bytes
+6 = output to binary file, only output changed sid registers inc. timing HI/LO bytes
+```
 A simplistic strategy pattern has been used to make it easy to add new output
 formats without changing the main code.
+
+The -m6 output file option can be used by the example ESP32 register based SID player available here:
+https://github.com/beachviking/arduino-sid-tools
+
+This output format dumps does a diff of all the SID registers(0-24) and outputs the following per frame(in binary):
+
+ABC...
+
+A = #number of registers changed for this frame
+B = [reg nr, if any]
+C = [reg value, if any]
+....
+
+'A' will always be written per frame.
+
+For the first frame, all registers will be reported to give these their initial value.
+
+Two "special" register numbers have been introduced with the LOW and HIGH numbers of the frame period(25 and 26), which together forms a 16 bit number which indicates the duration of the current frame, in uS. Many SID tunes use the default 50/60Hz timing, but others use custom CIA based timing. This can be used along with the desired sampling frequency to calculate the number of samples desired per frame.
+
+With the introduction of this functionality, CIA timing based tunes can be reproduced properly.  Given that only changed registers are reported per frame, a smaller file size is also obtained.
 
 _________________________________________________________
 ## SIDDump V1.08
