@@ -5,22 +5,21 @@ by beachviking
 Based on the original works of the authors cited below.
 Adds various output options by introducing an 'm' option:
 
-```
-0 = output to screen, with note information
-1 = output to screen, sid registers only
-2 = output to binary file, all sid registers per frame
-3 = output to c friendly include file, all sid registers per frame
-4 = output to binary file, all sid registers + timing HI/LO bytes per frame
-5 = output to screen, only output changed sid registers inc. timing HI/LO bytes
-6 = output to binary file, only output changed sid registers inc. timing HI/LO bytes
-```
+0. output to screen, with note information
+1. output to screen, sid registers only
+2. output to binary file, all sid registers per frame
+3. output to c friendly include file, all sid registers per frame
+4. output to binary file, all sid registers + timing HI/LO bytes per frame
+5. output to screen, only output changed sid registers inc. timing HI/LO bytes
+6. output to binary file, only output changed sid registers inc. timing HI/LO bytes
+
 A simplistic strategy pattern has been used to make it easy to add new output
 formats without changing the main code.
 
 The -m6 output file option can be used by the example ESP32 register based SID player available here:
 https://github.com/beachviking/arduino-sid-tools
 
-This output format dumps does a diff of all the SID registers(0-24) and outputs the following per frame(in binary):
+This output format does a diff of all the SID registers(0-24) and outputs the following per frame(in binary):
 
 ABC...
 
