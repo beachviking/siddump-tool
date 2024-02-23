@@ -36,7 +36,8 @@
 *.dmp
 *.json
 *.txt
-*.dSYM
+/*.dSYM/
 script
 
 
+siddump.out.dSYM/Contents/Info.plist
